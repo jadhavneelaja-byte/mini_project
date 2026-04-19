@@ -2,10 +2,9 @@ import axios from 'axios';
 
 const RENDER_API_BASE_URL = 'https://lab-inventory-backend-5393.onrender.com';
 const envBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
-const isDev = import.meta.env.DEV;
 
-// Use env variable when provided. In production, fall back to Render URL.
-const API_BASE_URL = (envBaseUrl || (isDev ? 'http://localhost:5000' : RENDER_API_BASE_URL)).replace(/\/+$/, '');
+// Use env variable when provided; otherwise always default to Render backend.
+const API_BASE_URL = (envBaseUrl || RENDER_API_BASE_URL).replace(/\/+$/, '');
 
 // Create axios instance with configured base URL
 const api = axios.create({

@@ -419,6 +419,7 @@ const AdminDashboard = () => {
                     <div>
                       <p className="font-semibold text-slate-800">{booking.item_name}</p>
                       <p className="text-sm text-slate-600">{booking.student} - {booking.lab}</p>
+                      {booking.requested_via === 'qr' && <p className="text-xs text-purple-700 font-semibold">Requested via QR</p>}
                       {booking.booking_date && <p className="text-sm text-slate-500">Date: {new Date(booking.booking_date).toLocaleDateString()}</p>}
                       {booking.time_slot && <p className="text-sm text-slate-500">Time: {booking.time_slot}</p>}
                     </div>
@@ -529,6 +530,9 @@ const AdminDashboard = () => {
                       <Package className="w-6 h-6 text-blue-500" />
                       <h3 className="text-xl font-bold text-slate-800">{booking.item_name}</h3>
                       <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-bold rounded-full">Pending</span>
+                      {booking.requested_via === 'qr' && (
+                        <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-bold rounded-full">QR Request</span>
+                      )}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>

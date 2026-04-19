@@ -167,10 +167,11 @@ const QRScanner = () => {
       setLoading(true);
       const response = await api.post('/api/request-equipment', {
         equipment_id: equipment.id,
+        equipment_unique_id: equipment.unique_id,
         quantity: 1
       });
       
-      showSuccess('Equipment request sent successfully!');
+      showSuccess('Equipment request sent to admin for approval.');
       setEquipment(null);
       setScannedData(null);
       setLoading(false);
@@ -311,7 +312,7 @@ const QRScanner = () => {
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transform transition hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <CheckCircle className="w-5 h-5" />
-                  Request Equipment
+                  Request for Approval
                 </button>
               ) : (
                 <button

@@ -286,6 +286,13 @@ const StudentLabView = () => {
                         >
                           Calendar
                         </button>
+                        <button
+                          onClick={() => setQrItem(item)}
+                          className="col-span-2 rounded-2xl bg-slate-700 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition flex items-center justify-center gap-2"
+                        >
+                          <QrCode className="w-4 h-4" />
+                          Show QR Code
+                        </button>
                       </div>
                     </div>
                   ))

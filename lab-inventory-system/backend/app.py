@@ -284,6 +284,7 @@ def get_my_bookings():
     bookings = Booking.query.filter_by(user_id=user.id).all()
     result = []
     for b in bookings:
+        requested_via = 'qr' if b.time_slot == 'QR_REQUEST' else 'manual'
         result.append({
             'id': b.id,
             'item_name': b.item.name,
@@ -293,7 +294,8 @@ def get_my_bookings():
             'time_borrowed': b.time_borrowed.isoformat() if b.time_borrowed else None,
             'time_returned': b.time_returned.isoformat() if b.time_returned else None,
             'booking_date': b.booking_date.isoformat() if b.booking_date else None,
-            'time_slot': b.time_slot
+            'time_slot': None if b.time_slot == 'QR_REQUEST' else b.time_slot,
+            'requested_via': requested_via
         })
     return jsonify(result)
 
@@ -380,6 +382,7 @@ def pending_requests():
     bookings = Booking.query.filter_by(status='pending').all()
     result = []
     for b in bookings:
+        requested_via = 'qr' if b.time_slot == 'QR_REQUEST' else 'manual'
         result.append({
             'id': b.id,
             'item_name': b.item.name,
@@ -387,7 +390,8 @@ def pending_requests():
             'lab': b.item.lab.name,
             'time_requested': b.time_requested.isoformat(),
             'booking_date': b.booking_date.isoformat() if b.booking_date else None,
-            'time_slot': b.time_slot
+            'time_slot': None if b.time_slot == 'QR_REQUEST' else b.time_slot,
+            'requested_via': requested_via
         })
     return jsonify(result)
 
@@ -618,11 +622,15 @@ def get_maintenance_history(item_id):
         })
     return jsonify(result)
 
-@app.route('/api/equipment/<int:equipment_id>', methods=['GET'])
+@app.route('/api/equipment/<equipment_ref>', methods=['GET'])
 @jwt_required()
-def get_equipment_details(equipment_id):
-    """Get equipment details by ID for QR code scanning"""
-    item = Item.query.get(equipment_id)
+def get_equipment_details(equipment_ref):
+    """Get equipment details by numeric ID or unique_id for QR code scanning."""
+    item = None
+    if str(equipment_ref).isdigit():
+        item = Item.query.get(int(equipment_ref))
+    if not item:
+        item = Item.query.filter_by(unique_id=equipment_ref).first()
     if not item:
         return jsonify({'message': 'Equipment not found'}), 404
     
@@ -645,7 +653,7 @@ def get_equipment_details(equipment_id):
 @app.route('/api/request-equipment', methods=['POST'])
 @jwt_required()
 def request_equipment():
-    """Request equipment using equipment_id (from QR scan)"""
+    """Request equipment using equipment_id or unique_id (from QR scan)."""
     current_user = get_jwt_identity()
     user = User.query.filter_by(username=current_user).first()
     if user.role != 'student':
@@ -653,11 +661,17 @@ def request_equipment():
     
     data = request.get_json()
     equipment_id = data.get('equipment_id')
+    equipment_unique_id = data.get('equipment_unique_id')
     quantity = data.get('quantity', 1)
     booking_date_str = data.get('booking_date')
     time_slot = data.get('time_slot')
-    
-    item = Item.query.get(equipment_id)
+
+    item = None
+    if equipment_id is not None and str(equipment_id).isdigit():
+        item = Item.query.get(int(equipment_id))
+    if not item and equipment_unique_id:
+        item = Item.query.filter_by(unique_id=equipment_unique_id).first()
+
     if not item:
         return jsonify({'message': 'Equipment not found'}), 404
     
@@ -672,12 +686,14 @@ def request_equipment():
         except ValueError:
             return jsonify({'message': 'Invalid booking date format'}), 400
     
+    effective_time_slot = time_slot or 'QR_REQUEST'
+
     booking = Booking(
         item_id=item.id, 
         user_id=user.id, 
         quantity_borrowed=quantity,
         booking_date=booking_date,
-        time_slot=time_slot
+        time_slot=effective_time_slot
     )
     db.session.add(booking)
     item.available_quantity -= quantity

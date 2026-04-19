@@ -304,8 +304,9 @@ const StudentDashboard = () => {
                         </button>
                         <button
                           onClick={() => setQrItem(item)}
-                          className="w-full rounded-xl bg-white border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-sm"
+                          className="w-full rounded-xl bg-slate-700 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-sm flex items-center justify-center gap-2"
                         >
+                          <QrCode className="w-4 h-4" />
                           Show QR Code
                         </button>
                       </div>
