@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-// Use relative URLs when served from Flask, absolute URLs for development
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// Get backend URL from environment variable, fallback to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
+// Create axios instance with configured base URL
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -10,7 +11,7 @@ const api = axios.create({
   },
 });
 
-// Add request interceptor to include auth token for the api instance
+// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -24,16 +25,16 @@ api.interceptors.request.use(
   }
 );
 
-// Also set up global axios interceptor
-axios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
+// Response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid, clear storage and redirect to login
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
     return Promise.reject(error);
   }
 );

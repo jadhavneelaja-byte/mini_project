@@ -1,115 +1,154 @@
 # Lab Inventory System - Deployment Guide
 
-This guide will help you deploy your lab inventory system so it can be accessed by people on different networks.
+## Production Deployment Architecture
 
-## 🚀 Backend Deployment (Flask API)
+### Frontend (Vercel)
+- **Platform**: Vercel
+- **Framework**: React + Vite
+- **API Communication**: Uses `VITE_API_BASE_URL` environment variable
 
-### Option 1: Heroku (Recommended)
+### Backend (Render)
+- **Platform**: Render
+- **Framework**: Flask + Gunicorn
+- **Database**: PostgreSQL (Render's free tier)
 
-1. **Create a Heroku account** at https://heroku.com
-2. **Install Heroku CLI** from https://devcenter.heroku.com/articles/heroku-cli
-3. **Login to Heroku**:
-   ```bash
-   heroku login
-   ```
+---
 
-4. **Create a new Heroku app**:
-   ```bash
-   cd backend
-   heroku create your-app-name
-   ```
+## Step-by-Step Deployment
 
-5. **Set environment variables** (replace with your actual values):
-   ```bash
-   heroku config:set FLASK_ENV=production
-   heroku config:set SECRET_KEY=your-secret-key-here
-   heroku config:set JWT_SECRET_KEY=your-jwt-secret-key-here
-   heroku config:set DATABASE_URL=your-database-url-if-using-external-db
-   ```
+### 1. Deploy Backend to Render
 
-6. **Deploy to Heroku**:
+1. **Push code to GitHub** (if not already):
    ```bash
    git add .
-   git commit -m "Prepare for deployment"
-   git push heroku main
+   git commit -m "Ready for deployment"
+   git push origin main
    ```
 
-7. **Your backend will be available at**: `https://your-app-name.herokuapp.com`
+2. **Create Render Web Service**:
+   - Go to https://render.com and sign in
+   - Click "New +" → "Web Service"
+   - Connect your GitHub repository
+   - Configure:
+     - **Name**: `lab-inventory-backend`
+     - **Root Directory**: `lab-inventory-system/backend`
+     - **Runtime**: `Python 3`
+     - **Build Command**: `pip install -r requirements.txt`
+     - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT --chdir lab-inventory-system/backend app:app`
+   - Click "Create Web Service"
+   - Wait for deployment to complete
 
-### Option 2: Railway
+3. **Copy your backend URL** (e.g., `https://lab-inventory-backend-5393.onrender.com`)
 
-1. Go to https://railway.app
-2. Connect your GitHub repository
-3. Railway will automatically detect it's a Python app
-4. Set environment variables in Railway dashboard
-5. Deploy automatically
+### 2. Deploy Frontend to Vercel
 
-## 🎨 Frontend Deployment (React)
-
-### Option 1: Vercel (Recommended)
-
-1. **Create a Vercel account** at https://vercel.com
-2. **Install Vercel CLI**:
+1. **Install Vercel CLI** (if not installed):
    ```bash
    npm install -g vercel
    ```
 
+2. **Create `.env` file in frontend folder**:
+   ```bash
+   cd lab-inventory-system/frontend
+   echo "VITE_API_BASE_URL=https://your-backend-url.onrender.com" > .env
+   ```
+   Replace `your-backend-url` with your actual Render backend URL.
+
 3. **Deploy to Vercel**:
    ```bash
-   cd frontend
    vercel --prod
    ```
+   - Follow the prompts (press Enter for defaults)
+   - Copy your frontend URL (e.g., `https://your-app.vercel.app`)
 
-4. **Set environment variable** for the backend URL:
-   - In Vercel dashboard, go to your project settings
-   - Add environment variable: `VITE_API_BASE_URL=https://your-backend-url.herokuapp.com`
+4. **Set Environment Variable in Vercel Dashboard**:
+   - Go to Vercel dashboard → Your project → Settings → Environment Variables
+   - Add: `VITE_API_BASE_URL` = `https://your-backend-url.onrender.com`
+   - Redeploy: Go to Deployments → Click "Redeploy" on the latest deployment
 
-5. **Your frontend will be available at**: `https://your-project-name.vercel.app`
+### 3. Verify Deployment
 
-### Option 2: Netlify
+1. **Test Backend**:
+   ```bash
+   # Should return: {"msg":"Missing Authorization Header"}
+   curl https://your-backend-url.onrender.com/api/labs
 
-1. Go to https://netlify.com
-2. Connect your GitHub repository
-3. Set build command: `npm run build`
-4. Set publish directory: `dist`
-5. Add environment variable: `VITE_API_BASE_URL=https://your-backend-url.herokuapp.com`
+   # Should return JWT token
+   curl -X POST https://your-backend-url.onrender.com/api/login \
+     -H "Content-Type: application/json" \
+     -d '{"username":"admin","password":"admin123","role":"admin"}'
+   ```
 
-## 🔧 Configuration Steps
+2. **Test Frontend**:
+   - Open your Vercel frontend URL in browser
+   - Login with:
+     - **Admin**: `admin` / `admin123`
+     - **Student**: `student` / `student123`
+   - QR Scanner should work (HTTPS from Vercel)
 
-### 1. Update CORS in Backend
-In `backend/app.py`, update the CORS origins to include your deployed frontend URL:
+---
 
-```python
-CORS(app, origins=[
-    "http://localhost:5173",  # Local development
-    "https://your-frontend-domain.vercel.app",  # Your Vercel domain
-    "https://your-frontend-domain.netlify.app",  # Your Netlify domain
-])
+## Default Credentials
+
+| Role    | Username | Password    |
+|---------|----------|-------------|
+| Admin   | admin    | admin123    |
+| Student | student  | student123  |
+| Teacher | teacher  | teacher123  |
+
+---
+
+## Troubleshooting
+
+### Login Returns 404
+- **Cause**: Frontend not using correct backend URL
+- **Fix**: Ensure `VITE_API_BASE_URL` is set in Vercel environment variables and redeploy
+
+### Camera Not Working
+- **Cause**: Camera requires HTTPS
+- **Fix**: Use Vercel (provides HTTPS automatically)
+
+### Database Errors
+- **Cause**: Database not seeded
+- **Fix**: Backend auto-seeds on startup, check Render logs
+
+---
+
+## Environment Variables
+
+### Frontend (.env)
+```
+VITE_API_BASE_URL=https://your-backend-url.onrender.com
 ```
 
-### 2. Update Vercel Configuration
-In `frontend/vercel.json`, replace `your-backend-url.herokuapp.com` with your actual backend URL.
+### Backend (Render Environment Variables)
+- None required (uses defaults from config.py)
 
-### 3. Environment Variables
-Copy `.env.example` to `.env` and set the correct backend URL for production.
+---
 
-## 🌐 Accessing Your Deployed App
+## Architecture Diagram
 
-Once deployed:
-- **Frontend**: `https://your-frontend-domain.vercel.app`
-- **Backend API**: `https://your-backend-app.herokuapp.com`
-
-People from different networks can now access your application using these public URLs!
-
-## 📝 Important Notes
-
-- Make sure to update the CORS settings in your backend to allow requests from your deployed frontend domain
-- Test the deployed application thoroughly before sharing
-- Consider setting up a custom domain if needed
-- For production, use environment variables for sensitive data like secret keys
-
-## 🐛 Troubleshooting
-
-- **CORS errors**: Check that your backend allows requests from the frontend domain
-- **API calls failing**: Verify the `VITE_API_BASE_URL` environment variable is set correctly
-- **Database issues**: Make sure your database is accessible from the deployed environment
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     User's Browser                          │
+│  (Mobile or Desktop - HTTPS via Vercel)                     │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  Vercel (Frontend)                          │
+│  - React + Vite                                             │
+│  - HTTPS enabled                                            │
+│  - QR Scanner works                                         │
+│  - Uses VITE_API_BASE_URL to call backend                   │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          │ API Calls (HTTPS)
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  Render (Backend)                           │
+│  - Flask + Gunicorn                                         │
+│  - PostgreSQL Database                                      │
+│  - Auto-seeds users on startup                              │
+│  - JWT Authentication                                       │
+└─────────────────────────────────────────────────────────────┘

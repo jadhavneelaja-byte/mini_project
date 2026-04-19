@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
     const userStr = localStorage.getItem('user');
     if (token && userStr) {
       try {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         return JSON.parse(userStr);
       } catch (e) {
         localStorage.removeItem('token');
@@ -25,7 +24,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password, role) => {
     try {
-      const res = await axios.post('/api/login', { username, password, role });
+      const res = await api.post('/api/login', { username, password, role });
       const { access_token, role: serverRole, user_id } = res.data;
       if (serverRole !== role) {
         return { success: false, message: 'Selected role does not match account role' };
@@ -35,7 +34,6 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       localStorage.setItem('token', access_token);
       localStorage.setItem('user', JSON.stringify(userData));
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       return { success: true, role: serverRole };
     } catch (error) {
       console.error('Login error:', error);
@@ -48,7 +46,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    delete axios.defaults.headers.common['Authorization'];
   };
 
   return (
