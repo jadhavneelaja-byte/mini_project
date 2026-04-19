@@ -3,9 +3,15 @@ from models import Lab, User, Item, Booking
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 
-with app.app_context():
-    db.drop_all()  # Drop all tables to recreate with new schema
-    db.create_all()
+def seed_database():
+    """Seed the database with initial data"""
+    with app.app_context():
+        # Check if already seeded
+        if User.query.first():
+            print("Database already seeded, skipping...")
+            return
+        
+        db.create_all()
 
     # Create labs
     if not Lab.query.filter_by(name='Physics').first():
@@ -165,3 +171,7 @@ with app.app_context():
 
     db.session.commit()
     print(f"Database seeded with {len(bookings_data)} bookings and sample damage reports!")
+
+# Allow running as standalone script
+if __name__ == '__main__':
+    seed_database()

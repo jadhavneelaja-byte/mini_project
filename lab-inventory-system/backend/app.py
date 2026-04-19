@@ -8,6 +8,10 @@ from routes import admin_bp
 from config import Config
 from datetime import datetime
 import os
+from seed import seed_data
+
+with app.app_context():
+    seed_data()
 
 app = Flask(__name__,
             static_folder='../frontend/dist',
@@ -823,5 +827,12 @@ def serve_react_app(path):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        # Auto-seed database on startup (for deployment)
+        try:
+            from seed import seed_database
+            seed_database()
+        except Exception as e:
+            print(f"Seed failed: {e}")
+            print("Continuing without seeding...")
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_ENV') == 'development')
