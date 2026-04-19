@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { QrCode, AlertTriangle, RotateCcw, Calendar, Camera } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { QRCodeSVG } from 'qrcode.react';
 import { useNotification } from '../contexts/NotificationContext';
 import BookingCalendar from './BookingCalendar';
@@ -23,7 +23,7 @@ const StudentDashboard = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get(`/api/labs/${labId}/items`);
+      const res = await api.get(`/api/labs/${labId}/items`);
       setItems(res.data);
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -33,7 +33,7 @@ const StudentDashboard = () => {
   const fetchBookings = async () => {
     // Fetch user's bookings - need to add endpoint
     try {
-      const res = await axios.get('/api/my-bookings');
+      const res = await api.get('/api/my-bookings');
       setBookings(res.data);
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -42,7 +42,7 @@ const StudentDashboard = () => {
 
   const requestBooking = async (itemId, quantity = 1) => {
     try {
-      await axios.post('/api/request-item', { item_id: itemId, quantity });
+      await api.post('/api/request-item', { item_id: itemId, quantity });
       fetchItems();
       showSuccess('Booking request sent to admin');
     } catch (error) {
@@ -52,7 +52,7 @@ const StudentDashboard = () => {
 
   const returnItem = async (bookingId) => {
     try {
-      await axios.post(`/api/return-item/${bookingId}`);
+      await api.post(`/api/return-item/${bookingId}`);
       fetchItems();
       fetchBookings();
     } catch (error) {
@@ -62,7 +62,7 @@ const StudentDashboard = () => {
 
   const reportDamage = async (itemId) => {
     try {
-      await axios.post('/api/report-damage', { itemId, description: 'Damage reported' });
+      await api.post('/api/report-damage', { itemId, description: 'Damage reported' });
       fetchItems();
     } catch (error) {
       console.error('Error reporting damage:', error);

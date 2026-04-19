@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, AlertCircle, Zap, BarChart3 } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 
 const EquipmentDemand = () => {
   const [demandData, setDemandData] = useState(null);
@@ -12,7 +12,7 @@ const EquipmentDemand = () => {
 
   const fetchDemandData = async () => {
     try {
-      const res = await axios.get('/api/equipment-demand');
+      const res = await api.get('/api/equipment-demand');
       setDemandData(res.data);
       setLoading(false);
     } catch (error) {

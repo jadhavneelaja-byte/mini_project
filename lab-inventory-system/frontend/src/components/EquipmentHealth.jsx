@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Wrench, TrendingDown, RotateCcw } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { useNotification } from '../contexts/NotificationContext';
 
 const EquipmentHealth = ({ labId }) => {
@@ -18,7 +18,7 @@ const EquipmentHealth = ({ labId }) => {
 
   const fetchEquipmentHealth = async () => {
     try {
-      const res = await axios.get('/api/items/health');
+      const res = await api.get('/api/items/health');
       setHealthData(res.data);
       setLoading(false);
     } catch (error) {
@@ -50,7 +50,7 @@ const EquipmentHealth = ({ labId }) => {
     setMaintenanceLoading(true);
 
     try {
-      await axios.post(`/api/items/${selectedItem.id}/maintenance`, {
+      await api.post(`/api/items/${selectedItem.id}/maintenance`, {
         description: maintenanceDescription || 'General maintenance',
       });
       showSuccess('Maintenance completed! Health score reset to 100%');

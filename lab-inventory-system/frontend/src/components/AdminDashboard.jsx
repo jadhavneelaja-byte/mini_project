@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Check, X, Package, Plus, Edit, Trash, QrCode, Wrench, TrendingUp, ClipboardList, AlertTriangle, BarChart3, Download, Printer } from 'lucide-react';
-import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Package, Plus, Edit, Trash, QrCode, AlertTriangle, TrendingUp, BarChart3, Clock, CheckCircle, AlertCircle, X, Check, ClipboardList, Wrench, Download, Printer } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { useNotification } from '../contexts/NotificationContext';
+import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext';
 import EquipmentHealth from './EquipmentHealth';
 import EquipmentDemand from './EquipmentDemand';
 
@@ -153,7 +153,7 @@ const AdminDashboard = () => {
 
   const fetchPendingBookings = async () => {
     try {
-      const res = await axios.get('/api/pending-requests');
+      const res = await api.get('/api/pending-requests');
       setPendingBookings(res.data);
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -162,7 +162,7 @@ const AdminDashboard = () => {
 
   const fetchDamageReports = async () => {
     try {
-      const res = await axios.get('/api/damage-reports');
+      const res = await api.get('/api/damage-reports');
       setDamageReports(res.data);
     } catch (error) {
       console.error('Error fetching damage reports:', error);
@@ -175,7 +175,7 @@ const AdminDashboard = () => {
       if (searchQuery || selectedCategory) {
         url = `/api/items/search?q=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(selectedCategory)}&lab_id=${selectedLabId || ''}`;
       }
-      const res = await axios.get(url);
+      const res = await api.get(url);
       setItems(res.data);
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -184,7 +184,7 @@ const AdminDashboard = () => {
 
   const fetchLabs = async () => {
     try {
-      const res = await axios.get('/api/labs');
+      const res = await api.get('/api/labs');
       setLabs(res.data);
       if (res.data.length > 0 && !selectedLabId) {
         setSelectedLabId(res.data[0].id);
@@ -196,7 +196,7 @@ const AdminDashboard = () => {
 
   const fetchUsageLogs = async () => {
     try {
-      const res = await axios.get('/api/usage-logs');
+      const res = await api.get('/api/usage-logs');
       setUsageLogs(res.data);
     } catch (error) {
       console.error('Error fetching usage logs:', error);
@@ -205,7 +205,7 @@ const AdminDashboard = () => {
 
   const approveBooking = async (id) => {
     try {
-      await axios.post('/api/admin/approve-request', { booking_id: id });
+      await api.post('/api/admin/approve-request', { booking_id: id });
       fetchPendingBookings();
       fetchItems();
       fetchUsageLogs();
@@ -216,7 +216,7 @@ const AdminDashboard = () => {
 
   const denyBooking = async (id) => {
     try {
-      await axios.post('/api/deny-request', { booking_id: id });
+      await api.post('/api/deny-request', { booking_id: id });
       fetchPendingBookings();
       fetchItems();
       fetchUsageLogs();
@@ -227,7 +227,7 @@ const AdminDashboard = () => {
 
   const resolveDamage = async (id) => {
     try {
-      await axios.post(`/api/admin/resolve-damage/${id}`);
+      await api.post(`/api/admin/resolve-damage/${id}`);
       fetchDamageReports();
     } catch (error) {
       console.error('Error resolving damage report:', error);
@@ -242,10 +242,10 @@ const AdminDashboard = () => {
     try {
       if (editingItem) {
         // Edit existing item
-        await axios.put(`/api/items/${editingItem.id}`, { ...itemData, lab_id: selectedLabId });
+        await api.put(`/api/items/${editingItem.id}`, { ...itemData, lab_id: selectedLabId });
       } else {
         // Add new item
-        await axios.post('/api/items', { ...itemData, lab_id: selectedLabId });
+        await api.post('/api/items', { ...itemData, lab_id: selectedLabId });
       }
       fetchItems();
       setShowAddItem(false);
@@ -259,7 +259,7 @@ const AdminDashboard = () => {
   const deleteItem = async (id) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
-        await axios.delete(`/api/items/${id}`);
+        await api.delete(`/api/items/${id}`);
         showSuccess('Item deleted successfully');
         fetchItems();
       } catch (error) {

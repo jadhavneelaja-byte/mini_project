@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Package, CheckCircle, Clock, AlertTriangle, TrendingUp, Zap, Activity, BarChart3 } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 
 const sampleStats = {
   equipment_stats: {
@@ -39,7 +39,7 @@ const SmartLabDashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const res = await axios.get('/api/dashboard-stats');
+      const res = await api.get('/api/dashboard-stats');
       if (res?.data) {
         setStats(res.data);
         setUsingSample(false);

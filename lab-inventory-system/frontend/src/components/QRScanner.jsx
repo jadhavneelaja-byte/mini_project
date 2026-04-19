@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, QrCode, X, AlertCircle, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { useNotification } from '../contexts/NotificationContext';
 
 const QRScanner = () => {
@@ -147,7 +147,7 @@ const QRScanner = () => {
 
       // Fetch equipment details
       setLoading(true);
-      const response = await axios.get(`/api/equipment/${equipmentId}`);
+      const response = await api.get(`/api/equipment/${equipmentId}`);
       setEquipment(response.data);
       setLoading(false);
       
@@ -165,7 +165,7 @@ const QRScanner = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post('/api/request-equipment', {
+      const response = await api.post('/api/request-equipment', {
         equipment_id: equipment.id,
         quantity: 1
       });

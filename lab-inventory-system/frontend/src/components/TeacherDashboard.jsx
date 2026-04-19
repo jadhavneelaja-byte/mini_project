@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BarChart3, AlertTriangle, Users, Clock, CheckCircle, XCircle, TrendingUp, Activity, Check } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import SmartLabDashboard from './SmartLabDashboard';
 
 const formatTimeGMT = (iso) => iso ? new Date(iso).toUTCString() : 'N/A';
@@ -28,7 +28,7 @@ const TeacherDashboard = () => {
 
   const fetchUsageLogs = async () => {
     try {
-      const res = await axios.get('/api/usage-logs');
+      const res = await api.get('/api/usage-logs');
       setUsageLogs(res.data);
     } catch (error) {
       console.error('Error fetching usage logs:', error);
@@ -37,7 +37,7 @@ const TeacherDashboard = () => {
 
   const fetchDamageReports = async () => {
     try {
-      const res = await axios.get('/api/damage-reports');
+      const res = await api.get('/api/damage-reports');
       setDamageReports(res.data);
     } catch (error) {
       console.error('Error fetching damage reports:', error);

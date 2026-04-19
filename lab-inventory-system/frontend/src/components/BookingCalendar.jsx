@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Clock, X } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { useNotification } from '../contexts/NotificationContext';
 
 const BookingCalendar = ({ item, onClose, onBookingConfirmed }) => {
@@ -68,7 +68,7 @@ const BookingCalendar = ({ item, onClose, onBookingConfirmed }) => {
     try {
       // Create the booking with the selected date and time slot
       const bookingDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), selectedDate);
-      await axios.post('/api/request-item', {
+      await api.post('/api/request-item', {
         item_id: item.id,
         quantity: 1,
         booking_date: bookingDate.toISOString().split('T')[0],

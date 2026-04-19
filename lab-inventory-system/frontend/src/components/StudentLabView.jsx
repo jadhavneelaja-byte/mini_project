@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { QrCode, AlertTriangle, RotateCcw, Calendar } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { QRCodeSVG } from 'qrcode.react';
 import { useNotification } from '../contexts/NotificationContext';
@@ -25,7 +25,7 @@ const StudentLabView = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get(`/api/labs/${labName}/items`);
+      const res = await api.get(`/api/labs/${labName}/items`);
       setItems(res.data);
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -34,7 +34,7 @@ const StudentLabView = () => {
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get('/api/my-bookings');
+      const res = await api.get('/api/my-bookings');
       // Filter bookings by the selected lab
       const labBookings = res.data.filter(booking => booking.lab_name === labName);
       setBookings(labBookings);
@@ -45,7 +45,7 @@ const StudentLabView = () => {
 
   const requestBooking = async (itemId, quantity = 1) => {
     try {
-      await axios.post('/api/request-item', { item_id: itemId, quantity });
+      await api.post('/api/request-item', { item_id: itemId, quantity });
       fetchItems();
       showSuccess('Booking request sent to admin');
     } catch (error) {
@@ -56,7 +56,7 @@ const StudentLabView = () => {
 
   const returnItem = async (bookingId) => {
     try {
-      await axios.post('/api/return-item', { booking_id: bookingId });
+      await api.post('/api/return-item', { booking_id: bookingId });
       fetchItems();
       fetchBookings();
       showSuccess('Item returned successfully');
@@ -70,7 +70,7 @@ const StudentLabView = () => {
     try {
       const description = prompt('Describe the damage:');
       if (!description) return;
-      await axios.post('/api/report-damage', { item_id: itemId, description });
+      await api.post('/api/report-damage', { item_id: itemId, description });
       fetchItems();
       showSuccess('Damage report submitted');
     } catch (error) {

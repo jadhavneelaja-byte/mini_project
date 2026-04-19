@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ const Dashboard = () => {
 
   const fetchLabs = async () => {
     try {
-      const res = await axios.get('/api/labs');
+      const res = await api.get('/api/labs');
       setLabs(res.data);
     } catch (error) {
       console.error('Error fetching labs:', error);
