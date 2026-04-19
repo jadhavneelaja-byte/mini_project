@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { QrCode, AlertTriangle, RotateCcw, Calendar } from 'lucide-react';
 import api from '../services/api';
-import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { QRCodeSVG } from 'qrcode.react';
 import { useNotification } from '../contexts/NotificationContext';
 import BookingCalendar from './BookingCalendar';
@@ -17,6 +17,7 @@ const StudentLabView = () => {
   const [showItemActions, setShowItemActions] = useState(false);
   const [qrItem, setQrItem] = useState(null);
   const [calendarItem, setCalendarItem] = useState(null);
+  const scannerRef = useRef(null);
 
   useEffect(() => {
     fetchItems();
@@ -106,38 +107,95 @@ const StudentLabView = () => {
     setScannedItem(null);
   };
 
+  const stopScanner = async () => {
+    if (!scannerRef.current) return;
+    try {
+      await scannerRef.current.stop();
+    } catch (_) {
+      // Ignore stop failures while tearing down scanner
+    }
+    try {
+      await scannerRef.current.clear();
+    } catch (_) {
+      // Ignore clear failures while tearing down scanner
+    }
+    scannerRef.current = null;
+  };
+
   const scanQR = () => {
     setShowScanner(true);
-    const scanner = new Html5QrcodeScanner('qr-reader', { 
-      fps: 10, 
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0,
-      supportedScanTypes: [Html5QrcodeSupportedFormats.QR_CODE],
-      showTorchButtonIfSupported: true,
-      showZoomSliderIfSupported: true
-    });
-    scanner.render((decodedText) => {
-      // Add vibration feedback on mobile
+  };
+
+  useEffect(() => {
+    if (!showScanner) return;
+
+    let cancelled = false;
+    const scanner = new Html5Qrcode('qr-reader');
+    scannerRef.current = scanner;
+
+    const onScanSuccess = async (decodedText) => {
+      if (cancelled) return;
+
       if ('vibrate' in navigator) {
         navigator.vibrate(200);
       }
-      
+
       const item = items.find(i => i.unique_id === decodedText);
+      await stopScanner();
+      setShowScanner(false);
+
       if (item) {
         setScannedItem(item);
         setShowItemActions(true);
-        scanner.clear();
-        setShowScanner(false);
       } else {
         showError('Item not found in this lab');
-        scanner.clear();
-        setShowScanner(false);
       }
-    }, (error) => {
-      // Handle scan errors silently
-      console.log('QR scan error:', error);
-    });
-  };
+    };
+
+    const onScanError = () => {
+      // Ignore frame-level decoding errors
+    };
+
+    const startScanner = async () => {
+      try {
+        await scanner.start(
+          { facingMode: { exact: 'environment' } },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+          },
+          onScanSuccess,
+          onScanError
+        );
+      } catch (_) {
+        try {
+          await scanner.start(
+            { facingMode: 'environment' },
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 250 },
+              formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+            },
+            onScanSuccess,
+            onScanError
+          );
+        } catch (error) {
+          console.error('Failed to start mobile camera:', error);
+          showError('Unable to access camera. Please allow camera permission and try again.');
+          setShowScanner(false);
+          await stopScanner();
+        }
+      }
+    };
+
+    startScanner();
+
+    return () => {
+      cancelled = true;
+      stopScanner();
+    };
+  }, [showScanner, items]);
 
   const getStatusColor = (status) => {
     if (status === 'available') return 'bg-green-100 text-green-800';
@@ -330,7 +388,10 @@ const StudentLabView = () => {
                 <p className="text-sm text-slate-500">Point your camera at the item QR code to select it.</p>
               </div>
               <button
-                onClick={() => setShowScanner(false)}
+                onClick={async () => {
+                  await stopScanner();
+                  setShowScanner(false);
+                }}
                 className="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 transition"
               >
                 Cancel
