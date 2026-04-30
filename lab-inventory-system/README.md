@@ -5,24 +5,35 @@ A full-stack web application for managing lab inventory with role-based access c
 🌐 Live Demo: https://mini-project-lyart-psi.vercel.app
 
 Tech Stack
+
 Backend: Flask (Python), SQLAlchemy, JWT
-Frontend: React (Vite), Tailwind CSS, Chart.js
+
+Frontend: React (Vite), Tailwind CSS
+
 Database: SQLite
 
 Features
+
 Student: Browse items, request bookings (QR), return items, report damage
+
 Admin: Manage inventory, approve/deny bookings, analytics dashboard
+
 Teacher: View usage logs and damage reports
 
 Highlights
 QR-based equipment booking
+
 Equipment categories & status tracking
+
 Search & filter functionality
+
 Analytics dashboard (charts & reports)
+
 Improved booking flow (pending → borrowed → returned)
+
 Clean UI + error handling
 
-Deployment
+Deployment: 
 https://mini-project-lyart-psi.vercel.app
 Hosted on Vercel
 Fully functional without local setup
