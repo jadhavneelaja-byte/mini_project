@@ -12,7 +12,7 @@ Frontend: React (Vite), Tailwind CSS
 
 Database: SQLite
 
-Features
+Features:
 
 Student: Browse items, request bookings (QR), return items, report damage
 
@@ -20,7 +20,8 @@ Admin: Manage inventory, approve/deny bookings, analytics dashboard
 
 Teacher: View usage logs and damage reports
 
-Highlights
+Highlights:
+
 QR-based equipment booking
 
 Equipment categories & status tracking
@@ -37,6 +38,8 @@ Deployment:
 https://mini-project-lyart-psi.vercel.app
 Hosted on Vercel
 Fully functional without local setup
+
+Run locally:
 
 # Backend
 cd backend
