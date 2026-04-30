@@ -1,4 +1,4 @@
-#Smart Lab Inventory Management and Booking System
+# Smart Lab Inventory Management and Booking System
 
 A full-stack web application for managing lab inventory with role-based access control.
 
