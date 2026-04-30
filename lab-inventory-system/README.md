@@ -47,6 +47,9 @@ npm install
 npm run dev
 
 Sample Users
-Admin: admin / AdminSecure2024!
-Student: student / StudentSecure2024!
-Teacher: teacher / TeacherSecure2024!
+
+Admin: admin / admin123
+
+Student: student / student123
+
+Teacher: teacher / teacher123
