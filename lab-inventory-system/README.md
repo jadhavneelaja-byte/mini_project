@@ -27,7 +27,6 @@ https://mini-project-lyart-psi.vercel.app
 Hosted on Vercel
 Fully functional without local setup
 
-Run Locally (Quick)
 # Backend
 cd backend
 python -m venv venv
