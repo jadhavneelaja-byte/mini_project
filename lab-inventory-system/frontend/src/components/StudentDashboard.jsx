@@ -253,7 +253,7 @@ const StudentDashboard = () => {
                 <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                   {items.map(item => (
                     <div key={item.id} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                      <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="flex items-start gap-4 mb-4">
                         <div className="flex-1">
                           <h3 className="text-xl font-bold text-slate-900 mb-2">{item.name}</h3>
                           <p className="text-sm text-slate-600 mb-3">{item.description}</p>
@@ -281,35 +281,40 @@ const StudentDashboard = () => {
                             </div>
                           </div>
                         </div>
+                        {/* QR Code Preview */}
+                        <div className="flex-shrink-0 p-2 bg-slate-50 rounded-xl border border-slate-200">
+                          <QRCodeSVG value={item.unique_id} size={60} level="M" />
+                        </div>
                       </div>
-                      <div className="grid gap-3">
-                        <button
-                          onClick={() => requestBooking(item.id)}
-                          className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3 text-sm font-semibold text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={item.available_quantity === 0}
-                        >
-                          Request Booking
-                        </button>
-                        <button
-                          onClick={() => setCalendarItem(item)}
-                          className="w-full rounded-xl bg-white border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-sm"
-                        >
-                          View Calendar
-                        </button>
-                        <button
-                          onClick={() => reportDamage(item.id)}
-                          className="w-full rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-4 py-3 text-sm font-semibold text-white hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg"
-                        >
-                          Report Damage
-                        </button>
-                        <button
-                          onClick={() => setQrItem(item)}
-                          className="w-full rounded-xl bg-slate-700 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-sm flex items-center justify-center gap-2"
-                        >
-                          <QrCode className="w-4 h-4" />
-                          Show QR Code
-                        </button>
-                      </div>
+                        <div className="grid grid-cols-1 gap-3">
+                          <button
+                            onClick={() => requestBooking(item.id)}
+                            className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3 text-sm font-semibold text-white hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={item.available_quantity === 0}
+                          >
+                            Request Booking
+                          </button>
+                          <button
+                            onClick={() => setCalendarItem(item)}
+                            className="w-full rounded-xl bg-white border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-sm"
+                          >
+                            View Calendar
+                          </button>
+                          <button
+                            onClick={() => reportDamage(item.id)}
+                            className="w-full rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-4 py-3 text-sm font-semibold text-white hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                            Report Damage
+                          </button>
+                          <button
+                            onClick={() => setQrItem(item)}
+                            className="w-full rounded-xl bg-slate-700 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-sm flex items-center justify-center gap-2"
+                          >
+                            <QrCode className="w-4 h-4" />
+                            Show QR Code
+                          </button>
+                        </div>
                     </div>
                   ))}
                 </div>

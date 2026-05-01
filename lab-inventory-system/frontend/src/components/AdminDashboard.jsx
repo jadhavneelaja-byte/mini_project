@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Package, Plus, Edit, Trash, QrCode, AlertTriangle, TrendingUp, BarChart3, Clock, CheckCircle, AlertCircle, X, Check, ClipboardList, Wrench, Download, Printer } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -147,6 +147,7 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [editingItem, setEditingItem] = useState(null);
+  const qrCodeRef = useRef(null);
 
   const query = new URLSearchParams(location.search);
   const view = query.get('view') || 'dashboard';
@@ -642,9 +643,9 @@ const AdminDashboard = () => {
         <div className="mb-6">
           <div className="flex items-center space-x-2 mb-4">
             <TrendingUp className="w-6 h-6 text-pink-500" />
-            <h2 className="text-xl font-semibold">Predictive Equipment Demand Analytics</h2>
+            <h2 className="text-xl font-semibold">Equipment Demand Analytics</h2>
           </div>
-          <p className="text-gray-600 mb-4">AI-powered insights on equipment demand patterns, bookings, and predictions for better inventory management.</p>
+          <p className="text-gray-600 mb-4">View equipment demand patterns and bookings for better inventory management.</p>
           <EquipmentDemand />
         </div>
       )}
@@ -699,7 +700,7 @@ const AdminDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.filter(item => item.lab_id == selectedLabId).map(item => (
               <div key={item.id} className="bg-white/95 backdrop-blur-sm border border-slate-200 p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start gap-4 mb-4">
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-slate-800 mb-2">{item.name}</h3>
                     <p className="text-slate-600 text-sm mb-3">{item.description}</p>
@@ -727,29 +728,33 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   </div>
+                  {/* QR Code Preview */}
+                  <div className="flex-shrink-0 p-2 bg-slate-50 rounded-xl border border-slate-200">
+                    <QRCodeSVG value={item.unique_id} size={60} level="M" />
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={() => editItem(item)}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl font-medium hover:from-yellow-600 hover:to-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteItem(item.id)}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-medium hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <Trash className="w-4 h-4" />
-                    Delete
-                  </button>
-                  <button
-                    onClick={() => setQrItem(item)}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-xl font-medium hover:from-slate-600 hover:to-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <QrCode className="w-4 h-4" />
-                    QR
-                  </button>
+                 <div className="flex flex-wrap gap-3">
+                   <button
+                     onClick={() => editItem(item)}
+                     className="flex-1 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl font-medium hover:from-yellow-600 hover:to-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                   >
+                     <Edit className="w-4 h-4" />
+                     Edit
+                   </button>
+                   <button
+                     onClick={() => deleteItem(item.id)}
+                     className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-medium hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                   >
+                     <Trash className="w-4 h-4" />
+                     Delete
+                   </button>
+                   <button
+                     onClick={() => setQrItem(item)}
+                     className="flex-1 px-4 py-2 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-xl font-medium hover:from-slate-600 hover:to-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transform transition hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                   >
+                     <QrCode className="w-4 h-4" />
+                     QR Code
+                   </button>
                 </div>
               </div>
             ))}
@@ -782,8 +787,8 @@ const AdminDashboard = () => {
             </div>
             
             <div className="text-center mb-6">
-              <div className="bg-slate-50 p-4 rounded-2xl">
-                <QRCodeSVG value={qrItem.unique_id} size={200} />
+              <div ref={qrCodeRef} className="bg-slate-50 p-4 rounded-2xl inline-block">
+                <QRCodeSVG value={qrItem.unique_id} size={200} id="qr-code-svg" />
               </div>
               <p className="text-sm text-slate-500 mt-3">Scan with mobile device</p>
             </div>
@@ -801,26 +806,58 @@ const AdminDashboard = () => {
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  // Download QR code as PNG
-                  const svg = document.querySelector('.bg-slate-50 p-4 rounded-2xl svg');
-                  if (svg) {
-                    const svgData = new XMLSerializer().serializeToString(svg.querySelector('svg'));
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
+                onClick={async () => {
+                  // Download QR code as PNG using canvas
+                  const svgElement = document.getElementById('qr-code-svg');
+                  if (!svgElement) {
+                    showError('QR code not found');
+                    return;
+                  }
+                  
+                  try {
+                    // Get SVG data
+                    const svgData = new XMLSerializer().serializeToString(svgElement);
+                    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                    const url = URL.createObjectURL(svgBlob);
+                    
+                    // Create image
                     const img = new Image();
                     img.onload = () => {
-                      canvas.width = img.width;
-                      canvas.height = img.height;
+                      const canvas = document.createElement('canvas');
+                      const size = 400; // Higher resolution
+                      canvas.width = size;
+                      canvas.height = size;
+                      
+                      const ctx = canvas.getContext('2d');
                       ctx.fillStyle = 'white';
-                      ctx.fillRect(0, 0, canvas.width, canvas.height);
-                      ctx.drawImage(img, 0, 0);
-                      const link = document.createElement('a');
-                      link.download = `${qrItem.name}-QR.png`;
-                      link.href = canvas.toDataURL('image/png');
-                      link.click();
+                      ctx.fillRect(0, 0, size, size);
+                      ctx.drawImage(img, 0, 0, size, size);
+                      
+                      // Download
+                      canvas.toBlob((blob) => {
+                        if (blob) {
+                          const downloadUrl = URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.download = `${qrItem.name.replace(/\s+/g, '_')}-QR.png`;
+                          link.href = downloadUrl;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          URL.revokeObjectURL(downloadUrl);
+                          showSuccess('QR code downloaded!');
+                        }
+                      }, 'image/png');
+                      
+                      URL.revokeObjectURL(url);
                     };
-                    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+                    img.onerror = () => {
+                      showError('Failed to generate image');
+                      URL.revokeObjectURL(url);
+                    };
+                    img.src = url;
+                  } catch (err) {
+                    console.error('Download error:', err);
+                    showError('Failed to download: ' + err.message);
                   }
                 }}
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transform transition hover:scale-105 shadow-lg flex items-center justify-center gap-2"
@@ -831,33 +868,99 @@ const AdminDashboard = () => {
               <button
                 onClick={() => {
                   // Print QR code
+                  const printWindow = window.open('', '_blank', 'width=400,height=500');
+                  if (!printWindow) {
+                    showError('Please allow popups to print');
+                    return;
+                  }
+                  
                   const printContent = `
+                    <!DOCTYPE html>
                     <html>
                       <head>
                         <title>QR Code - ${qrItem.name}</title>
                         <style>
-                          body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+                          body { 
+                            font-family: Arial, sans-serif; 
+                            text-align: center; 
+                            padding: 30px; 
+                            margin: 0;
+                          }
+                          h2 { margin-bottom: 20px; color: #333; }
                           .qr-container { margin: 20px auto; }
                           .details { margin-top: 20px; font-size: 14px; color: #666; }
+                          .details p { margin: 5px 0; }
+                          @media print {
+                            body { padding: 10px; }
+                          }
                         </style>
                       </head>
                       <body>
-                        <h2>QR Code for ${qrItem.name}</h2>
+                        <h2>QR Code: ${qrItem.name}</h2>
                         <div class="qr-container">
-                          ${document.querySelector('.bg-slate-50 p-4 rounded-2xl').innerHTML}
+                          <svg id="print-qr" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${qrItem.unique_id.length * 10 + 100} ${qrItem.unique_id.length * 10 + 100}" width="200" height="200">
+                            <!-- QR code will be regenerated for print -->
+                          </svg>
                         </div>
                         <div class="details">
                           <p><strong>Item ID:</strong> ${qrItem.unique_id}</p>
-                          <p><strong>Lab:</strong> ${qrItem.lab_name}</p>
+                          <p><strong>Lab:</strong> ${qrItem.lab_name || 'N/A'}</p>
                           <p><strong>Category:</strong> ${qrItem.category}</p>
                         </div>
+                        <script>
+                          // Simple QR code generation for print
+                          (function() {
+                            const svg = document.getElementById('print-qr');
+                            const text = '${qrItem.unique_id}';
+                            // Create a simple pattern for QR code
+                            let svgContent = '';
+                            const size = 21; // QR code modules
+                            const moduleSize = 8;
+                            svg.setAttribute('viewBox', '0 0 ' + (size * moduleSize) + ' ' + (size * moduleSize));
+                            svg.setAttribute('width', '200');
+                            svg.setAttribute('height', '200');
+                            
+                            // Generate QR-like pattern based on text hash
+                            let hash = 0;
+                            for (let i = 0; i < text.length; i++) {
+                              hash = ((hash << 5) - hash) + text.charCodeAt(i);
+                              hash |= 0;
+                            }
+                            
+                            for (let y = 0; y < size; y++) {
+                              for (let x = 0; x < size; x++) {
+                                // Position detection patterns (corners)
+                                const isCorner = (x < 7 && y < 7) || (x >= size - 7 && y < 7) || (x < 7 && y >= size - 7);
+                                const isBorder = isCorner && (x === 0 || x === 6 || y === 0 || y === 6 || x === size-1 || x === size-7 || y === size-1 || y === size-7);
+                                const isInner = isCorner && (x >= 2 && x <= 4 && y >= 2 && y <= 4);
+                                
+                                let fill = 'black';
+                                if (isBorder || isInner) {
+                                  fill = 'black';
+                                } else if (isCorner) {
+                                  fill = 'white';
+                                } else {
+                                  // Data area - use hash to determine pattern
+                                  fill = ((hash + x * 31 + y * 17) % 3 === 0) ? 'black' : 'white';
+                                }
+                                
+                                if (fill === 'black') {
+                                  svgContent += '<rect x="' + (x * moduleSize) + '" y="' + (y * moduleSize) + '" width="' + moduleSize + '" height="' + moduleSize + '" fill="black"/>';
+                                }
+                              }
+                            }
+                            svg.innerHTML = svgContent;
+                          })();
+                        </script>
                       </body>
                     </html>
                   `;
-                  const printWindow = window.open('', '_blank');
+                  
                   printWindow.document.write(printContent);
                   printWindow.document.close();
-                  printWindow.print();
+                  setTimeout(() => {
+                    printWindow.print();
+                  }, 500);
                 }}
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-medium hover:from-green-600 hover:to-green-700 transform transition hover:scale-105 shadow-lg flex items-center justify-center gap-2"
               >

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, AlertCircle, Zap, BarChart3 } from 'lucide-react';
+import { TrendingUp, Zap, BarChart3 } from 'lucide-react';
 import api from '../services/api';
 
 const EquipmentDemand = () => {
@@ -157,53 +157,6 @@ const EquipmentDemand = () => {
           ))}
         </div>
       </div>
-
-      {/* AI Predictions */}
-      {demandData.predictions.length > 0 && (
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <div className="flex items-center mb-6">
-            <Zap className="w-6 h-6 mr-3 text-orange-600" />
-            <h2 className="text-xl font-bold text-gray-800">🤖 AI Demand Predictions</h2>
-          </div>
-          <div className="space-y-4">
-            {demandData.predictions.map((pred, index) => (
-              <div
-                key={index}
-                className={`p-5 rounded-lg border-l-4 transition-all duration-200 hover:shadow-md ${
-                  pred.confidence === 'High'
-                    ? 'bg-red-50 border-red-400'
-                    : 'bg-blue-50 border-blue-400'
-                }`}
-              >
-                <div className="flex items-start space-x-4">
-                  <AlertCircle
-                    className={`w-6 h-6 mt-1 flex-shrink-0 ${
-                      pred.confidence === 'High'
-                        ? 'text-red-600'
-                        : 'text-blue-600'
-                    }`}
-                  />
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-3">
-                      <p className="font-semibold text-gray-800 text-lg">{pred.item_name}</p>
-                      <span
-                        className={`text-xs font-bold px-3 py-1 rounded-full ${
-                          pred.confidence === 'High'
-                            ? 'bg-red-200 text-red-800'
-                            : 'bg-blue-200 text-blue-800'
-                        }`}
-                      >
-                        {pred.confidence} Confidence
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-700 leading-relaxed">{pred.prediction}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Insights */}
       <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg shadow-lg p-6 border border-indigo-200">
